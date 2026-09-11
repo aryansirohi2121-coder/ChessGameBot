@@ -45,12 +45,12 @@ source .venv/bin/activate
 ## Roadmap & Up next
 We have open issues tracking immediate enhancements:
 
-[ ] Legal move indicator dots on selection
-[ ] Sound effects for moves, captures, checks, and game over
-[ ] High-resolution realistic piece sets (with toggles)
-[ ] Beginner Mode: hover trajectory arrows/target highlights
-[ ] Realistic simulated think delay for bot turns
-[ ] UCI / Stockfish engine support with variable difficulty levels
+- [ ] Legal move indicator dots on selection
+- [ ] Sound effects for moves, captures, checks, and game over
+- [ ] High-resolution realistic piece sets (with toggles)
+- [ ] Beginner Mode: hover trajectory arrows/target highlights
+- [ ] Realistic simulated think delay for bot turns
+- [ ] UCI / Stockfish engine support with variable difficulty levels
 
 Want to tackle one of these? Check out our [Issues](https://github.com/estherg12/ChessGameBot/issues) tab and read [CONTRIBUTING.md](https://github.com/estherg12/ChessGameBot/blob/main/CONTRIBUTING.md) to get started!
 
