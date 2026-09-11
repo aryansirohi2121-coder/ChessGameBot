@@ -1,4 +1,5 @@
 import pygame
+import random
 import chess
 import sys
 from bot import get_best_move
@@ -67,6 +68,8 @@ def main():
     selected_sq = None
 
     running = True
+    bot_thinking_started_at = None
+    bot_thinking_delay = 0
     while running:
         is_bot_turn = vs_bot and (board.turn == bot_color) and not board.is_game_over()
 
@@ -108,9 +111,23 @@ def main():
 
         # Bot Move Execution
         if is_bot_turn:
-            bot_move = get_best_move(board, depth=3)
-            if bot_move:
-                board.push(bot_move)
+            current_time = pygame.time.get_ticks()
+
+            # Start a new thinking period when the bot's turn begins
+            if bot_thinking_started_at is None:
+                bot_thinking_started_at = current_time
+                bot_thinking_delay = random.randint(500, 1500)
+
+            # Make the move once the non-blocking delay has elapsed
+            elif current_time - bot_thinking_started_at >= bot_thinking_delay:
+                bot_move = get_best_move(board, depth=3)
+
+                if bot_move:
+                    board.push(bot_move)
+
+                bot_thinking_started_at = None
+        else:
+            bot_thinking_started_at = None
 
         draw_board(screen, board, selected_sq)
         draw_pieces(screen, board, images)
