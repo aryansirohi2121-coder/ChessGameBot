@@ -54,6 +54,38 @@ def draw_pieces(screen, board, images):
             screen.blit(images[key], (col * SQ_SIZE, row * SQ_SIZE))
 
 
+def draw_valid_moves(screen, board, selected_sq):
+    """Draws legal move hints (dots for empty squares, rings for captures)."""
+    if selected_sq is None:
+        return
+
+    overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    valid_moves = [m for m in board.legal_moves if m.from_square == selected_sq]
+    seen_squares = set()
+
+    for move in valid_moves:
+        dest_sq = move.to_square
+        if dest_sq in seen_squares:
+            continue
+        seen_squares.add(dest_sq)
+
+        col = chess.square_file(dest_sq)
+        row = 7 - chess.square_rank(dest_sq)
+        center_x = col * SQ_SIZE + SQ_SIZE // 2
+        center_y = row * SQ_SIZE + SQ_SIZE // 2
+
+        is_capture = board.piece_at(dest_sq) is not None or board.is_en_passant(move)
+
+        if is_capture:
+            ring_radius = SQ_SIZE // 2 - 4
+            pygame.draw.circle(overlay, (34, 34, 34, 90), (center_x, center_y), ring_radius, width=6)
+        else:
+            dot_radius = SQ_SIZE // 6
+            pygame.draw.circle(overlay, (34, 34, 34, 80), (center_x, center_y), dot_radius)
+
+    screen.blit(overlay, (0, 0))
+
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -107,7 +139,14 @@ def main():
 
                     if move in board.legal_moves:
                         board.push(move)
-                    selected_sq = None
+                        selected_sq = None
+                    else:
+                        # If clicking another piece of the current turn, switch selection
+                        clicked_piece = board.piece_at(clicked_sq)
+                        if clicked_piece and clicked_piece.color == board.turn:
+                            selected_sq = clicked_sq
+                        else:
+                            selected_sq = None
 
         # Bot Move Execution
         if is_bot_turn:
@@ -131,6 +170,7 @@ def main():
 
         draw_board(screen, board, selected_sq)
         draw_pieces(screen, board, images)
+        draw_valid_moves(screen, board, selected_sq)
         pygame.display.flip()
         clock.tick(FPS)
 
