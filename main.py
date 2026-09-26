@@ -34,6 +34,49 @@ def load_images():
     return images
 
 
+def load_sounds():
+    """Loads sound assets for the game."""
+    sounds = {}
+    try:
+        pygame.mixer.init()
+    except pygame.error:
+        print("Warning: No audio device found. Running without sound.")
+        return sounds
+
+    sound_files = ["move", "capture", "check", "game_over"]
+    for s in sound_files:
+        try:
+            sounds[s] = pygame.mixer.Sound(f"assets/sounds/{s}.wav")
+        except FileNotFoundError:
+            try:
+                sounds[s] = pygame.mixer.Sound(f"assets/sounds/{s}.ogg")
+            except FileNotFoundError:
+                print(f"Warning: Sound file not found: assets/sounds/{s}.(wav|ogg)")
+    return sounds
+
+
+def push_and_play_sound(board, move, sounds):
+    """Pushes the move to the board and plays the appropriate sound."""
+    is_capture = board.is_capture(move)
+    board.push(move)
+    
+    if not sounds:
+        return
+
+    if board.is_game_over():
+        if "game_over" in sounds:
+            sounds["game_over"].play()
+    elif board.is_check():
+        if "check" in sounds:
+            sounds["check"].play()
+    elif is_capture:
+        if "capture" in sounds:
+            sounds["capture"].play()
+    else:
+        if "move" in sounds:
+            sounds["move"].play()
+
+
 def draw_board(screen, board, selected_sq):
     for r in range(DIMENSION):
         for c in range(DIMENSION):
@@ -62,6 +105,7 @@ def main():
 
     board = chess.Board()
     images = load_images()
+    sounds = load_sounds()
 
     vs_bot = False  # Toggle with key '2'
     bot_color = chess.BLACK
@@ -106,7 +150,7 @@ def main():
                         move = chess.Move(selected_sq, clicked_sq, promotion=chess.QUEEN)
 
                     if move in board.legal_moves:
-                        board.push(move)
+                        push_and_play_sound(board, move, sounds)
                     selected_sq = None
 
         # Bot Move Execution
@@ -123,7 +167,7 @@ def main():
                 bot_move = get_best_move(board, depth=3)
 
                 if bot_move:
-                    board.push(bot_move)
+                    push_and_play_sound(board, bot_move, sounds)
 
                 bot_thinking_started_at = None
         else:
